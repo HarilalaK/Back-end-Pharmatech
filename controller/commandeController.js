@@ -198,7 +198,23 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
 });
 
 const getCommandes = catchAsync(async (req, res, next) => {
-  const commandes = await commande.findAll();
+  const commandes = await commande.findAll({
+    include: [
+      {
+        model: commandeProduit,
+        include: [
+          {
+            model: produit,
+            attributes: ["nom", "prix", "tva_pourcentage"],
+          },
+        ],
+      },
+      {
+        model: utilisateur, // On inclut l'utilisateur associé à la commande
+        attributes: ["id", "nom", "prenom", "email"], // Sélection des attributs utilisateur
+      },
+    ],
+  });
 
   // Vérifie si la liste est vide
   if (!commandes || commandes.length === 0) {
