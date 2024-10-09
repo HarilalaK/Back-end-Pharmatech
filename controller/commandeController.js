@@ -153,6 +153,10 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
           },
         ],
       },
+      {
+        model: utilisateur,
+        attributes: ["nom", "prenom", "email", "phone"],
+      },
     ],
   });
 
@@ -161,37 +165,10 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
   }
 
   // Transformer les données pour obtenir la structure souhaitée
-  const resultats = commandes.map((commande) => {
-    return {
-      idCommande: commande.id,
-      date: commande.date_commande,
-      user: {
-        id: req.utilisateur.id,
-        nom: req.utilisateur.nom,
-        email: req.utilisateur.email,
-      },
-      commande: commande.commandeProduits.map((cp) => {
-        const prixUnitaire = cp.produit.prix;
-        const quantiteCommandee = cp.quantite;
-        const TVA = cp.produit.tva_pourcentage;
-        const prixHT = prixUnitaire * quantiteCommandee;
-        const prixAvecTVA = prixHT * (1 + TVA / 100);
-
-        return {
-          idProduit: cp.produit_id,
-          nomProduit: cp.produit.nom,
-          quantiteCommandee: quantiteCommandee,
-          prixUnitaire: prixUnitaire,
-          TVA: TVA,
-          prixAvecTVA: prixAvecTVA,
-        };
-      }),
-    };
-  });
 
   return res.status(200).json({
     status: "success",
-    data: resultats,
+    data: commandes,
     message:
       "Voici les commandes de l'utilisateur avec détails utilisateur et produits.",
   });
