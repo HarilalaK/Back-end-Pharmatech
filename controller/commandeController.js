@@ -83,6 +83,10 @@ const getCommandesUtilisateurs = catchAsync(async (req, res, next) => {
   const commandes = await commande.findAll({
     include: [
       {
+        model: utilisateur,
+        attributes: ["nom", "prenom", "email", "phone"],
+      },
+      {
         model: commandeProduit,
         include: [
           {
@@ -90,50 +94,23 @@ const getCommandesUtilisateurs = catchAsync(async (req, res, next) => {
             attributes: ["nom", "prix", "tva_pourcentage"],
           },
         ],
-      },
-      {
-        model: utilisateur, // On inclut l'utilisateur associé à la commande
-        attributes: ["id", "nom", "prenom", "email"], // Sélection des attributs utilisateur
+        attributes: ["produit_id", "quantite"],
       },
     ],
+    attributes: ["id", "utilisateur_id", "date_commande", "statut"],
   });
 
   if (!commandes.length) {
     return next(new AppError("Aucune commande trouvée", 404));
   }
 
-  // Transformer les données en fonction des besoins
-  const resultats = commandes.map((commande) => {
-    return {
-      idUtilisateur: commande.utilisateur.id, // ID de l'utilisateur
-      nomUtilisateur: commande.utilisateur.nom, // Nom de l'utilisateur
-      prenomUtilisateur: commande.utilisateur.prenom, // Prénom de l'utilisateur
-      emailUtilisateur: commande.utilisateur.email, // Email de l'utilisateur
-      idCommande: commande.id, // ID de la commande
-      dateCommande: commande.date, // Date de la commande
-      produits: commande.commandeProduits.map((cp) => {
-        const prixUnitaire = cp.produit.prix;
-        const quantiteCommandee = cp.quantite;
-        const TVA = cp.produit.tva_pourcentage;
-        const prixHT = prixUnitaire * quantiteCommandee;
-        const prixAvecTVA = prixHT * (1 + TVA / 100);
-
-        return {
-          idProduit: cp.produit_id,
-          nomProduit: cp.produit.nom,
-          quantiteCommandee: quantiteCommandee,
-          prixUnitaire: prixUnitaire,
-          TVA: TVA,
-          prixAvecTVA: prixAvecTVA,
-        };
-      }),
-    };
-  });
+  // Transformer les données pour obtenir la structure souhaitée
 
   return res.status(200).json({
     status: "success",
-    data: resultats, // Retourner une liste d'objets
-    message: "Voici la liste des commandes avec les détails des utilisateurs.",
+    data: commandes,
+    message:
+      "Voici les commandes de l'utilisateur avec détails utilisateur et produits.",
   });
 });
 
