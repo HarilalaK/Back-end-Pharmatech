@@ -9,6 +9,7 @@ const {
   getCommandesUtilisateurId,
   supprimerCommandesUtilisateurId,
   getCommandesUtilisateurs,
+  getCommandes,
 } = require("../controller/commandeController");
 
 const router = require("express").Router();
@@ -24,6 +25,7 @@ router
   .route("/liste")
   .get(authentification, restriction("admin"), getCommandesUtilisateurs);
 
+router.route("/test").get(getCommandes);
 router
   .route("/:id")
   .patch(authentification, mettreAJourStatutCommande)

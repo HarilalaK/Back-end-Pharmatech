@@ -197,6 +197,26 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
   });
 });
 
+const getCommandes = catchAsync(async (req, res, next) => {
+  const commandes = await commande.findAll();
+
+  // Vérifie si la liste est vide
+  if (!commandes || commandes.length === 0) {
+    return next(new AppError("Aucune commande trouvée", 404));
+  }
+
+  // Réponse en cas de succès
+  return res.status(200).json({
+    status: "success",
+    results: commandes.length, // Inclut le nombre de commandes
+    data: {
+      commandes, // Les commandes renvoyées
+    },
+    message:
+      "Voici les commandes de l'utilisateur avec détails utilisateur et produits.",
+  });
+});
+
 /*                          Récupérer les commandes d'un utilisateur                     */
 const getCommandesUtilisateurId = catchAsync(async (req, res, next) => {
   const utilisateurId = req.utilisateur.id;
@@ -323,6 +343,7 @@ const supprimerCommandesUtilisateurId = catchAsync(async (req, res, next) => {
 
 module.exports = {
   creerCommande,
+  getCommandes,
   getCommandesUtilisateur,
   getCommandesUtilisateurs,
   getCommandesUtilisateurId,
