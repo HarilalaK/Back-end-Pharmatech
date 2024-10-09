@@ -145,6 +145,10 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
     where: { utilisateur_id: utilisateurId },
     include: [
       {
+        model: utilisateur,
+        attributes: ["nom", "prenom", "email", "phone"],
+      },
+      {
         model: commandeProduit,
         include: [
           {
@@ -152,12 +156,10 @@ const getCommandesUtilisateur = catchAsync(async (req, res, next) => {
             attributes: ["nom", "prix", "tva_pourcentage"],
           },
         ],
-      },
-      {
-        model: utilisateur,
-        attributes: ["nom", "prenom", "email", "phone"],
+        attributes: ["produit_id", "quantite"],
       },
     ],
+    attributes: ["id", "utilisateur_id", "date_commande", "statut"],
   });
 
   if (!commandes.length) {
